@@ -3,23 +3,33 @@ from src.generate_explanation import generate_explanation
 from src.generate_advice import generate_parenting_advice
 
 
+# Callback-Funktion zum Leeren des Eingabefeldes (vermeidet Konflikt mit Widget-Key)
+def clear_input():
+    st.session_state.advice_question = ""
+
+
 def explanation_tab():
     """UI und Logik für kindgerechte Erklärungen."""
     st.header("Kindgerechte Erklärungen")
 
     topic = st.text_input("Gib ein Thema ein:", "Wie funktioniert ein Auto?", key="topic")
+
     age_group = st.selectbox(
         "Alter des Kindes:",
         ["< 3 Jahre", "3–6 Jahre", "7–9 Jahre", "10–12 Jahre", "13+ Jahre"],
         key="age_group",
     )
+
     style = st.radio(
         "Erklärform:",
         ["normale Erklärung", "als Geschichte", "Frage-Antwort-Dialog"],
         key="style",
     )
+
     length = st.radio(
-        "Umfang der Erklärung:", ["kurz", "mittel", "ausführlich"], key="length"
+        "Umfang der Erklärung:",
+        ["kurz", "mittel", "ausführlich"],
+        key="length"
     )
 
     if st.button("Erklärung generieren", key="explain_btn"):
@@ -37,16 +47,21 @@ def advice_tab():
     """UI und Logik für die Eltern-Beratung mit Chat-Verlauf."""
     st.header("Eltern-Berater-Bot")
 
+    # Session-State initialisieren
     if "advice_history" not in st.session_state:
         st.session_state.advice_history = []
+    if "advice_question" not in st.session_state:
+        st.session_state.advice_question = ""
 
+    # Eingaben: Alter und Stil
     child_age = st.number_input(
         "Alter deines Kindes (in Jahren):",
         min_value=0,
         max_value=18,
         value=6,
-        key="child_age",
+        key="child_age"
     )
+
     parenting_style = st.selectbox(
         "Bevorzugter Erziehungsstil:",
         [
@@ -57,30 +72,32 @@ def advice_tab():
             "Situationsbedingt",
             "Sonstige",
         ],
-        key="parenting_style",
+        key="parenting_style"
     )
 
+    # Chatverlauf anzeigen
     for msg in st.session_state.advice_history:
         role = "Du" if msg["role"] == "user" else "Berater"
         st.markdown(f"**{role}:** {msg['content']}")
 
-    question = st.text_input("Deine Nachricht:", key="advice_question")
-    if st.button("Senden", key="advice_send"):
-        if question.strip():
+    # Eingabefeld mit SessionState & Callback
+    st.text_input("Deine Nachricht:", key="advice_question", on_change=clear_input)
+
+    # Button klickt auf aktuelle Session-Eingabe
+    if st.button("Senden"):
+        question = st.session_state.advice_question.strip()
+
+        if question:
             response = generate_parenting_advice(
                 question,
                 child_age,
                 parenting_style,
                 st.session_state.advice_history,
             )
-            st.session_state.advice_history.append(
-                {"role": "user", "content": question}
-            )
-            st.session_state.advice_history.append(
-                {"role": "assistant", "content": response}
-            )
-            st.session_state.advice_question = ""
-            st.experimental_rerun()
+
+            st.session_state.advice_history.append({"role": "user", "content": question})
+            st.session_state.advice_history.append({"role": "assistant", "content": response})
+            st.rerun()
 
 
 def main():
