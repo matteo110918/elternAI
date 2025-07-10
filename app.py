@@ -139,6 +139,20 @@ def meal_tab():
         key="meal_diet",
     )
 
+    preference = st.selectbox(
+        "Vorlieben:",
+        [
+            "Keine besonderen",
+            "Pasta",
+            "Bowl",
+            "Auflauf",
+            "Salat",
+            "Suppe",
+            "Fingerfood",
+        ],
+        key="meal_preference",
+    )
+
     foods_input = st.text_input(
         "Lebensmittel, die du zuhause hast (kommagetrennt):",
         key="meal_foods",
@@ -153,7 +167,8 @@ def meal_tab():
         elif not child_ages:
             child_ages = [6] * child_count
 
-        suggestion = generate_meal_suggestion(child_ages[:child_count], adult_count, diet, foods)
+        pref = None if preference == "Keine besonderen" else preference
+        suggestion = generate_meal_suggestion(child_ages[:child_count], adult_count, diet, pref, foods)
         st.subheader("Vorgeschlagenes Gericht")
         st.write(suggestion)
 
