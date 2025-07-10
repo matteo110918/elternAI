@@ -34,12 +34,18 @@ def explanation_tab():
 
 
 def advice_tab():
-    """UI und Logik für die Eltern-Beratung."""
+    """UI und Logik für die Eltern-Beratung mit Chat-Verlauf."""
     st.header("Eltern-Berater-Bot")
 
-    question = st.text_input("Welche Erziehungsfrage hast du?", key="question")
+    if "advice_history" not in st.session_state:
+        st.session_state.advice_history = []
+
     child_age = st.number_input(
-        "Alter deines Kindes (in Jahren):", min_value=0, max_value=18, value=6, key="child_age"
+        "Alter deines Kindes (in Jahren):",
+        min_value=0,
+        max_value=18,
+        value=6,
+        key="child_age",
     )
     parenting_style = st.selectbox(
         "Bevorzugter Erziehungsstil:",
@@ -54,10 +60,27 @@ def advice_tab():
         key="parenting_style",
     )
 
-    if st.button("Beratung erhalten", key="advice_btn"):
-        advice = generate_parenting_advice(question, child_age, parenting_style)
-        st.subheader("Beratung")
-        st.write(advice)
+    for msg in st.session_state.advice_history:
+        role = "Du" if msg["role"] == "user" else "Berater"
+        st.markdown(f"**{role}:** {msg['content']}")
+
+    question = st.text_input("Deine Nachricht:", key="advice_question")
+    if st.button("Senden", key="advice_send"):
+        if question.strip():
+            response = generate_parenting_advice(
+                question,
+                child_age,
+                parenting_style,
+                st.session_state.advice_history,
+            )
+            st.session_state.advice_history.append(
+                {"role": "user", "content": question}
+            )
+            st.session_state.advice_history.append(
+                {"role": "assistant", "content": response}
+            )
+            st.session_state.advice_question = ""
+            st.experimental_rerun()
 
 
 def main():
