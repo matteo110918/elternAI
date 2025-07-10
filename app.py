@@ -1,6 +1,7 @@
 import streamlit as st
 from src.generate_explanation import generate_explanation
 from src.generate_advice import generate_parenting_advice
+from src.generate_meal_suggestion import generate_meal_suggestion
 
 
 
@@ -106,17 +107,62 @@ def advice_tab():
         st.rerun()
 
 
+def meal_tab():
+    """UI und Logik für Essensvorschläge."""
+    st.header("Essensvorschläge")
+
+    age = st.number_input(
+        "Alter deines Kindes (in Jahren):",
+        min_value=0,
+        max_value=18,
+        value=6,
+        key="meal_age",
+    )
+
+    diet = st.selectbox(
+        "Ernährungsstil:",
+        ["Omnivor", "Vegetarisch", "Vegan", "Glutenfrei", "Laktosefrei", "Sonstige"],
+        key="meal_diet",
+    )
+
+    portions = st.number_input(
+        "Anzahl der Portionen:",
+        min_value=1,
+        max_value=10,
+        value=2,
+        key="meal_portions",
+    )
+
+    foods_input = st.text_input(
+        "Lebensmittel, die du zuhause hast (kommagetrennt):",
+        key="meal_foods",
+    )
+
+    if st.button("Essensvorschlag generieren", key="meal_btn"):
+        foods = [f.strip() for f in foods_input.split(",") if f.strip()] if foods_input else None
+        suggestion = generate_meal_suggestion(age, diet, portions, foods)
+        st.subheader("Vorgeschlagenes Gericht")
+        st.write(suggestion)
+
+
 def main():
     st.set_page_config(page_title="Eltern-AI")
     st.title("Eltern-AI")
 
-    tab_explain, tab_advice = st.tabs(["Erklärungs-Funktion", "Beratungs-Funktion"])
+    tab_explain, tab_advice, tab_meal = st.tabs([
+        "Erklärungs-Funktion",
+        "Beratungs-Funktion",
+        "Essens-Vorschlag",
+    ])
 
     with tab_explain:
         explanation_tab()
 
     with tab_advice:
         advice_tab()
+
+    with tab_meal:
+        meal_tab()
 
 
 if __name__ == "__main__":
