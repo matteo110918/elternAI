@@ -13,34 +13,40 @@ client = OpenAI(api_key=api_key)
 
 
 def generate_meal_suggestion(
-    age: int,
+    child_ages: List[int],
+    adult_count: int,
     diet: str,
-    portions: int,
     available_foods: Optional[List[str]] = None,
 ) -> str:
     """Generiert einen Essensvorschlag unter Berücksichtigung der Vorgaben.
 
-    :param age: Alter des Kindes in Jahren.
+    :param child_ages: Liste der Kinderalter in Jahren.
+    :param adult_count: Anzahl der Erwachsenen.
     :param diet: Ernährungsstil (z. B. "Vegetarisch").
-    :param portions: Anzahl der Portionen.
     :param available_foods: Liste vorhandener Lebensmittel.
     :return: Antworttext vom Sprachmodell.
     """
 
     available_text = (
-        f" Folgende Lebensmittel sind bereits vorhanden: {', '.join(available_foods)}." 
-        if available_foods else ""
+        f" Folgende Lebensmittel sind bereits vorhanden: {', '.join(available_foods)}."
+        if available_foods
+        else ""
     )
 
     system_msg = (
-        "Du bist ein erfahrener Koch, der gesunde Mahlzeiten für Kinder vorschlägt. "
-        "Berücksichtige Alter, Ernährungsstil und Portionsanzahl."
+        "Du bist ein erfahrener Koch, der gesunde Mahlzeiten für Familien vorschlägt. "
+        "Berücksichtige die Altersangaben der Kinder, die Anzahl der Erwachsenen und den Ernährungsstil."
     )
 
+    child_description = (
+        "keine Kinder"
+        if not child_ages
+        else f"{len(child_ages)} Kinder im Alter von {', '.join(map(str, child_ages))} Jahren"
+    )
     user_prompt = (
-        f"Das Kind ist {age} Jahre alt. "
+        f"Es sind {child_description} und {adult_count} Erwachsene zu verköstigen. "
         f"Der Ernährungsstil ist '{diet}'. "
-        f"Bitte schlage ein Gericht für {portions} Portionen vor." + available_text
+        "Bitte schlage ein Gericht mit passenden Portionen vor." + available_text
     )
 
     try:

@@ -111,26 +111,32 @@ def meal_tab():
     """UI und Logik für Essensvorschläge."""
     st.header("Essensvorschläge")
 
-    age = st.number_input(
-        "Alter deines Kindes (in Jahren):",
+    child_count = st.number_input(
+        "Anzahl der Kinder:",
         min_value=0,
-        max_value=18,
-        value=6,
-        key="meal_age",
+        max_value=10,
+        value=1,
+        key="meal_child_count",
+    )
+
+    child_ages_input = st.text_input(
+        "Alter der Kinder (kommagetrennt):",
+        "6",
+        key="meal_child_ages",
+    )
+
+    adult_count = st.number_input(
+        "Anzahl der Erwachsenen:",
+        min_value=0,
+        max_value=10,
+        value=2,
+        key="meal_adults",
     )
 
     diet = st.selectbox(
         "Ernährungsstil:",
         ["Omnivor", "Vegetarisch", "Vegan", "Glutenfrei", "Laktosefrei", "Sonstige"],
         key="meal_diet",
-    )
-
-    portions = st.number_input(
-        "Anzahl der Portionen:",
-        min_value=1,
-        max_value=10,
-        value=2,
-        key="meal_portions",
     )
 
     foods_input = st.text_input(
@@ -140,7 +146,14 @@ def meal_tab():
 
     if st.button("Essensvorschlag generieren", key="meal_btn"):
         foods = [f.strip() for f in foods_input.split(",") if f.strip()] if foods_input else None
-        suggestion = generate_meal_suggestion(age, diet, portions, foods)
+        child_ages = [int(a.strip()) for a in child_ages_input.split(",") if a.strip()] if child_ages_input else []
+        # Wenn die Altersliste kürzer ist als die Kinderanzahl, fehlende Alter mit dem letzten Wert auffüllen
+        if child_ages and len(child_ages) < child_count:
+            child_ages.extend([child_ages[-1]] * (child_count - len(child_ages)))
+        elif not child_ages:
+            child_ages = [6] * child_count
+
+        suggestion = generate_meal_suggestion(child_ages[:child_count], adult_count, diet, foods)
         st.subheader("Vorgeschlagenes Gericht")
         st.write(suggestion)
 
