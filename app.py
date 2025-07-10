@@ -7,7 +7,7 @@ def explanation_tab():
     """UI und Logik für kindgerechte Erklärungen."""
     st.header("Kindgerechte Erklärungen")
 
-    topic = st.text_input("Gib ein Thema ein:", "Was ist der Tod?", key="topic")
+    topic = st.text_input("Gib ein Thema ein:", "Wie funktioniert ein Auto?", key="topic")
     age_group = st.selectbox(
         "Alter des Kindes:",
         ["< 3 Jahre", "3–6 Jahre", "7–9 Jahre", "10–12 Jahre", "13+ Jahre"],
