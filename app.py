@@ -3,9 +3,7 @@ from src.generate_explanation import generate_explanation
 from src.generate_advice import generate_parenting_advice
 
 
-# Callback-Funktion zum Leeren des Eingabefeldes (vermeidet Konflikt mit Widget-Key)
-def clear_input():
-    st.session_state.advice_question = ""
+
 
 
 def explanation_tab():
@@ -52,6 +50,12 @@ def advice_tab():
         st.session_state.advice_history = []
     if "advice_question" not in st.session_state:
         st.session_state.advice_question = ""
+    if "clear_advice_input" not in st.session_state:
+        st.session_state.clear_advice_input = False
+
+    if st.session_state.clear_advice_input:
+        st.session_state.advice_question = ""
+        st.session_state.clear_advice_input = False
 
     # Eingaben: Alter und Stil
     child_age = st.number_input(
@@ -80,8 +84,8 @@ def advice_tab():
         role = "Du" if msg["role"] == "user" else "Berater"
         st.markdown(f"**{role}:** {msg['content']}")
 
-    # Eingabefeld mit SessionState & Callback
-    st.text_input("Deine Nachricht:", key="advice_question", on_change=clear_input)
+    # Eingabefeld
+    st.text_input("Deine Nachricht:", key="advice_question")
 
     # Button klickt auf aktuelle Session-Eingabe
     if st.button("Senden"):
@@ -97,7 +101,9 @@ def advice_tab():
 
             st.session_state.advice_history.append({"role": "user", "content": question})
             st.session_state.advice_history.append({"role": "assistant", "content": response})
-            st.rerun()
+
+        st.session_state.clear_advice_input = True
+        st.rerun()
 
 
 def main():
