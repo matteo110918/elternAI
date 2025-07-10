@@ -16,6 +16,7 @@ def generate_meal_suggestion(
     child_ages: List[int],
     adult_count: int,
     diet: str,
+    preference: Optional[str] = None,
     available_foods: Optional[List[str]] = None,
 ) -> str:
     """Generiert einen Essensvorschlag unter Berücksichtigung der Vorgaben.
@@ -23,6 +24,7 @@ def generate_meal_suggestion(
     :param child_ages: Liste der Kinderalter in Jahren.
     :param adult_count: Anzahl der Erwachsenen.
     :param diet: Ernährungsstil (z. B. "Vegetarisch").
+    :param preference: Wunschgericht oder bevorzugte Art von Mahlzeit.
     :param available_foods: Liste vorhandener Lebensmittel.
     :return: Antworttext vom Sprachmodell.
     """
@@ -43,10 +45,14 @@ def generate_meal_suggestion(
         if not child_ages
         else f"{len(child_ages)} Kinder im Alter von {', '.join(map(str, child_ages))} Jahren"
     )
+
+    pref_text = f" Bevorzugt sind Gerichte wie '{preference}'." if preference else ""
+
     user_prompt = (
         f"Es sind {child_description} und {adult_count} Erwachsene zu verköstigen. "
-        f"Der Ernährungsstil ist '{diet}'. "
-        "Bitte schlage ein Gericht mit passenden Portionen vor." + available_text
+        f"Der Ernährungsstil ist '{diet}'."
+        + pref_text +
+        " Bitte schlage ein Gericht mit passenden Portionen vor." + available_text
     )
 
     try:
